@@ -24,7 +24,7 @@ const Sidebar = () => {
     <div
       style={{
         width: 90,
-        height: '100vh',
+        height: 'calc(100vh - 90px)',
         background: 'rgba(246, 250, 253, 0.90)',
         borderRight: '1px solid #EAEEF4',
         display: 'flex',

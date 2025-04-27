@@ -23,7 +23,63 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+.react-calendar {
+  width: 100%;
+  background: white;
+  border: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  border-radius: 12px;
+  box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+  padding: 20px;
+}
+.react-calendar__navigation {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
 
+/* 월 표시 */
+.react-calendar__navigation button {
+  color: #092C4C;
+  font-size: 18px;
+  font-weight: bold;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* 요일 헤더 */
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #7E92A2;
+  margin-bottom: 8px;
+}
+
+/* 날짜 칸 */
+.react-calendar__tile {
+  text-align: center;
+  padding: 10px 0;
+  background: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+/* 선택된 날짜 */
+.react-calendar__tile--active {
+  background: #514EF3;
+  color: white;
+  border-radius: 8px;
+}
+
+/* hover */
+.react-calendar__tile:hover {
+  background: #D6E4FF;
+  border-radius: 8px;
+}
 .App-link {
   color: #61dafb;
 }

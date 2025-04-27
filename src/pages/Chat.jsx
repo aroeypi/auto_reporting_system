@@ -111,7 +111,7 @@ const Chat = () => {
 const chatWrapper = {
   width: '100%',
   maxWidth: 900,
-  margin: '90px auto',
+  margin: 'auto',
   display: 'flex',
   flexDirection: 'column',
   background: 'white',

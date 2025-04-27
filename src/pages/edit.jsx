@@ -50,7 +50,6 @@ const Edit = () => {
       style={{
         width: '100%',
         maxWidth: 900,
-        margin: '90px auto',
         background: 'white',
         borderRadius: 12,
         padding: 32,

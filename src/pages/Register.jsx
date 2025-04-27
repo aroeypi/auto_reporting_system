@@ -1,4 +1,3 @@
-// src/pages/Register.jsx
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
@@ -22,24 +21,38 @@ const Register = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 로컬 저장소 및 컨텍스트에 저장
-    localStorage.setItem('user_info', JSON.stringify(form));
-    localStorage.setItem('isLoggedIn', 'true');
+    try {
+      const response = await fetch('http://localhost:8000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
 
-    setUserInfo(form);
-    setIsLoggedIn(true);
+      if (!response.ok) throw new Error('회원가입 실패');
 
-    console.log('회원가입 완료:', form);
-    navigate('/');
+      const data = await response.json();
+
+      localStorage.setItem('user_info', JSON.stringify(data));
+      localStorage.setItem('isLoggedIn', 'true');
+
+      setUserInfo(data);
+      setIsLoggedIn(true);
+      navigate('/');
+    } catch (error) {
+      console.error('회원가입 오류:', error);
+      alert('회원가입에 실패했습니다.');
+    }
   };
 
   return (
     <div
       style={{
-        marginTop: 90,
+        marginTop: 0,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -62,7 +75,7 @@ const Register = () => {
           boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
         }}
       >
-        <h2 style={{ color: '#092C4C', marginBottom: 0 }}>회원가입</h2>
+        <h2 style={{ color: '#092C4C', width: '30%' }}>회원가입</h2>
 
         <div style={{ display: 'flex', gap: 20 }}>
           <div style={{ flex: 1 }}>
@@ -72,7 +85,7 @@ const Register = () => {
               value={form.firstName}
               onChange={handleChange}
               placeholder="김"
-              style={{ ...inputStyle }}
+              style={inputStyle}
             />
           </div>
           <div style={{ flex: 1 }}>
@@ -82,7 +95,7 @@ const Register = () => {
               value={form.lastName}
               onChange={handleChange}
               placeholder="눈송"
-              style={{ ...inputStyle }}
+              style={inputStyle}
             />
           </div>
         </div>
@@ -94,8 +107,8 @@ const Register = () => {
               name="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="noonsong@sookmyung.ac.kr"
-              style={{ ...inputStyle }}
+              placeholder="noonsong@example.com"
+              style={inputStyle}
             />
           </div>
           <div style={{ flex: 1 }}>
@@ -104,8 +117,8 @@ const Register = () => {
               name="phone"
               value={form.phone}
               onChange={handleChange}
-              placeholder="010-1111-1111"
-              style={{ ...inputStyle }}
+              placeholder="010-1234-5678"
+              style={inputStyle}
             />
           </div>
         </div>
@@ -116,8 +129,8 @@ const Register = () => {
             name="department"
             value={form.department}
             onChange={handleChange}
-            placeholder="부서를 입력하세요"
-            style={{ ...inputStyle }}
+            placeholder="부서 입력"
+            style={inputStyle}
           />
         </div>
 
@@ -128,7 +141,7 @@ const Register = () => {
             value={form.username}
             onChange={handleChange}
             placeholder="아이디 입력"
-            style={{ ...inputStyle }}
+            style={inputStyle}
           />
         </div>
 
@@ -140,24 +153,13 @@ const Register = () => {
             value={form.password}
             onChange={handleChange}
             placeholder="비밀번호 입력"
-            style={{ ...inputStyle }}
+            style={inputStyle}
           />
         </div>
 
         <button
           type="submit"
-          style={{
-            width: '100%',
-            padding: 12,
-            background: '#514EF3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 8,
-            fontSize: 16,
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            marginTop: 12,
-          }}
+          style={submitButtonStyle}
         >
           회원가입
         </button>
@@ -175,16 +177,26 @@ const labelStyle = {
 };
 
 const inputStyle = {
-  padding: '10px 20px',
+  padding: '12px 16px',
   borderRadius: 8,
-  background: '#EEF6FB',
-  border: '1px solid #EAEEF4',
-  fontSize: 16,
-  color: '#092C4C',
-  outline: 'none',
+  border: '1px solid #D6E1E6',
+  fontSize: 14,
   width: '100%',
-  maxWidth: '200px',
+  boxSizing: 'border-box',
+  minWidth: '0',
+};
+
+const submitButtonStyle = {
+  width: '100%',
+  padding: 12,
+  background: '#514EF3',
+  color: 'white',
+  border: 'none',
+  borderRadius: 8,
+  fontSize: 16,
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  marginTop: 12,
 };
 
 export default Register;
-
