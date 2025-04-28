@@ -14,16 +14,42 @@ const Login = () => {
     }
   }, []);
 
-  const handleLogin = () => {
-    console.log('로그인 시도:', { email, password });
-    setIsLoggedIn(true);
-    navigate('/');
-  };
+  
 
   const handleRegister = () => {
     navigate('/register');
   };
-
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+  
+      if (!response.ok) throw new Error('Login failed');
+  
+      const data = await response.json();
+      console.log('로그인 성공 데이터:', data);
+  
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user_info', JSON.stringify(data.user));
+      localStorage.setItem('isLoggedIn', 'true');
+  
+      setUserInfo(data.user);
+      setIsLoggedIn(true);
+  
+      navigate('/');
+    } catch (error) {
+      console.error('로그인 실패:', error);
+      alert('로그인 실패');
+    }
+  };
   const handleKakaoLogin = () => {
     if (!window.Kakao) {
       alert('Kakao SDK 로딩 실패');
