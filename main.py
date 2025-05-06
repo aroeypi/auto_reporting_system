@@ -1,19 +1,21 @@
-from rag_engine.llm import load_llm
-from rag_engine.embedder import get_embedder
-from rag_engine.vector_store import load_vector_db
-from rag_engine.chain import build_search_chain
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from api.routes import report  # 라우터 임포트
 
-if __name__ == "__main__":
-    embedder = get_embedder()
-    vectordb = load_vector_db(embedder)
-    retriever = vectordb.as_retriever()
-    llm = load_llm()
-    chain = build_search_chain(llm, retriever)
+app = FastAPI(
+    title="RAG Report Generator API",
+    description="PDF를 업로드하고 프롬프트를 입력하면 보고서를 생성해주는 API",
+    version="1.0.0",
+)
 
-    print("\n RAG 시스템 실행 준비 완료")
-    while True:
-        query = input("\n 질문을 입력하세요 (종료: q): ")
-        if query.strip().lower() == "q":
-            break
-        response = chain.invoke({"question": query})
-        print("\n 답변:", response)
+# CORS 설정 (프론트엔드 연동 시 필요)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 추후 배포 시 도메인 제한 권장
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 라우터 등록
+app.include_router(report.router, prefix="/api", tags=["Report"])

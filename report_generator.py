@@ -5,6 +5,12 @@ from rag_engine.embedder import get_embedder
 from rag_engine.vector_store import load_vector_db
 from transformers import AutoTokenizer
 
+
+import requests
+from fastapi import FastAPI, Form
+from pydantic import BaseModel
+
+
 def get_report_prompt():
     template = """
     다음 문서 내용을 기반으로 사용자가 원하는 주제에 대한 보고서를 작성하세요.
@@ -23,8 +29,8 @@ def generate_report(topic: str):
     retriever = vectordb.as_retriever()
     docs = retriever.get_relevant_documents(topic)
 
-    for i, doc in enumerate(docs):
-        print(f"[DOC {i}] {doc.page_content[:300]}...\n")  # 앞 300자만 미리보기
+    # for i, doc in enumerate(docs):
+    #     print(f"[DOC {i}] {doc.page_content[:300]}...\n")  # 앞 300자만 미리보기
 
     context = "\n".join([doc.page_content for doc in docs])
 
@@ -48,23 +54,40 @@ def generate_report(topic: str):
     return output
 
 
+
+# ✅ API 요청/응답 스키마
+class GenerateReportRequest(BaseModel):
+    prompt: str
+
+class GenerateReportResponse(BaseModel):
+    prompt: str
+    report: str
+
+# ✅ FastAPI 라우터
+app = FastAPI(title="AI Report Generator API")
+
+@app.post("/generate_report", response_model=GenerateReportResponse)
+async def generate_report_api(prompt: str = Form(...)):
+    report = generate_report(prompt)
+    return GenerateReportResponse(prompt=prompt, report=report)
+
+
+
 if __name__ == "__main__":
     topic = input(" 보고서 주제를 입력하세요: ")
     report = generate_report(topic)
     print("\n 보고서 결과:\n")
     print(report)
 
-    #서버!?!
-        # JSON payload 구성
-    data = {
-        "topic": topic,
-        "report": report
-    }
 
-    # 서버에 POST 전송
-    try:
-        response = requests.post("http://localhost:8000/api/report", json=data)
-        print("서버 응답 상태코드:", response.status_code)
-        print("서버 응답 본문:", response.text)
-    except requests.exceptions.RequestException as e:
-        print("⚠️ 서버 요청 중 오류 발생:", e)
+
+# def generate_report_from_server(prompt: str):
+#     try:
+#         response = requests.post(
+#             "http://localhost:8000/api/generate_report",
+#             data={"prompt": prompt}  # ← form data로 보내는 방식
+#         )
+#         print("서버 응답 상태코드:", response.status_code)
+#         print("생성된 보고서:", response.json()["report"])
+#     except requests.exceptions.RequestException as e:
+#         print(" 서버 요청 중 오류 발생:", e)
