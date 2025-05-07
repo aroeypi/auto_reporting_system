@@ -8,8 +8,8 @@ import Register from './pages/Register';
 import Edit from './pages/edit';
 import Edit2 from './pages/edit2';
 import { AuthContext } from './contexts/AuthContext'; 
-import Chat from './pages/chat';   // 대문자 C
-import Edit3 from './pages/edit3'; // 대문자 E
+import Chat from './pages/Chat';   // 대문자 C
+import Edit3 from './pages/Edit3'; // 대문자 E
 import Result from './pages/Result'; 
 import File from './pages/File'; 
 import Settings from './pages/Settings'; 

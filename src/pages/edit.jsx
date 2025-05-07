@@ -1,6 +1,7 @@
 // src/pages/Edit.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Edit = () => {
   const navigate = useNavigate();
@@ -22,8 +23,17 @@ const Edit = () => {
     const file = e.target.files[0];
     if (file) {
       setFileName(file.name);
+  
+      const reader = new FileReader();
+      reader.onload = () => {
+        // 텍스트로 인코딩한 파일 내용 localStorage에 저장
+        localStorage.setItem('edit_file', reader.result);  // base64 또는 text
+        localStorage.setItem('edit_fileName', file.name);
+      };
+      reader.readAsDataURL(file); // 바이너리를 base64로 읽음 (이미지나 PDF 등 가능)
     }
   };
+  
 
   const handleRemoveTag = (tagToRemove) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));

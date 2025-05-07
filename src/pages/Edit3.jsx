@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext.js';
 import AiChat from '../components/AiChat.jsx';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 
 const Edit3 = () => {
   const navigate = useNavigate();
   const { userInfo } = useContext(AuthContext);
+  const hasFetched = useRef(false);
 
   const [reportTitle, setReportTitle] = useState('');
   const [reportContent, setReportContent] = useState('');
@@ -19,25 +20,64 @@ const Edit3 = () => {
   const sidebarWidth = isSidebarOpen ? 600 : 300;
 
   useEffect(() => {
-    const title = localStorage.getItem('edit_subject');
-    setReportTitle(title || '제목 없음');
-    setReportContent(`이 보고서는 "${title}"에 대한 AI가 자동 생성한 초안입니다. 내용을 수정할 수 있습니다.`);
-
+    const topic = localStorage.getItem('edit_subject');
+    const base64 = localStorage.getItem('edit_file');
+    const fileName = localStorage.getItem('edit_fileName');
+  
+    if (!topic) return;
+  
+    const formData = new FormData();
+    formData.append('topic', topic);
+  
+    if (base64 && fileName) {
+      // base64를 Blob으로 변환
+      const byteString = atob(base64.split(',')[1]);
+      const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+  
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+  
+      const blob = new Blob([ab], { type: mimeString });
+      const file = new File([blob], fileName, { type: mimeString });
+  
+      formData.append('file', file);
+    }
+  
+    fetch('http://127.0.0.1:8000/api/generate-report', {
+      method: 'POST',
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('서버 오류');
+        return res.json();
+      })
+      .then((data) => {
+        setReportTitle(data.title);
+        setReportContent(data.content);
+        setAllSources(data.sources.map((src, i) => ({
+          id: i + 1,
+          title: `출처 ${i + 1}`,
+          summary: src,
+        })));
+        setSelectedSources([1, 2, 3]);
+      })
+      .catch((err) => {
+        console.error('보고서 생성 실패:', err);
+      });
+  
     const formattedDate = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
     setToday(formattedDate);
-
-    const fakeData = Array.from({ length: 12 }, (_, i) => ({
-      id: i + 1,
-      title: `제목 ${i + 1}`,
-      summary: `요약 내용 ${i + 1}`,
-    }));
-    setAllSources(fakeData);
-    setSelectedSources(fakeData.slice(0, 3).map((s) => s.id));
   }, []);
+  
+  
+  
 
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
