@@ -1,3 +1,4 @@
+// src/pages/Edit3.jsx
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext.js';
 import AiChat from '../components/AiChat.jsx';
@@ -55,6 +56,7 @@ const Edit3 = () => {
         return res.json();
       })
       .then((data) => {
+        console.log('[DEBUG] 서버 응답:', data);
         setReportTitle(data.title);
         setReportContent(data.content);
         setAllSources(data.sources.map((src, i) => ({
