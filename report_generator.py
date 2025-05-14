@@ -51,7 +51,9 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
     # 3. 벡터 DB에 임베딩
     embedder = get_embedder()
     vectordb = load_vector_db(embedder)
-    add_to_vector_db(docs, vectordb)
+    if docs:
+        add_to_vector_db(docs, vectordb)
+
 
     # 4. 관련 문서 검색(내부검색)
     retriever = vectordb.as_retriever()
@@ -79,12 +81,20 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
     if len(tokens) > 800:
         tokens = tokens[:800]
     trimmed_prompt = tokenizer.decode(tokens)
-
+    
     # 8. LLM 호출
     llm = load_llm()
     output = llm.invoke(trimmed_prompt)
 
-    return output
+    # 9. 출처 수집
+    sources = [doc.metadata.get("source") for doc in all_docs if "source" in doc.metadata]
+
+    # 10. JSON 형태로 반환
+    return {
+        "title": f"{topic} 보고서",
+        "content": output.strip(),
+        "sources": sources
+    }
 
 
 
@@ -109,9 +119,14 @@ async def generate_report_api(prompt: str = Form(...)):
 
 if __name__ == "__main__":
     topic = input(" 보고서 주제를 입력하세요: ")
-    report = generate_report(topic)
-    print("\n 보고서 결과:\n")
-    print(report)
+    report = generate_report(topic, file=None, references=None)
+    print("\n📄 보고서 제목:")
+    print(report["title"])
+    print("\n📝 보고서 내용:")
+    print(report["content"])
+    print("\n🔗 참고 출처:")
+    for src in report["sources"]:
+        print("-", src)
 
 
 
