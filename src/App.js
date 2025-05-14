@@ -15,6 +15,8 @@ import File from './pages/File';
 import Settings from './pages/Settings'; 
 import 'react-calendar/dist/Calendar.css';
 import './App.css';
+import Alarm from './pages/Alarm';
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,6 +56,7 @@ function App() {
             <Route path="edit3" element={<Edit3 />} />
             <Route path="result" element={<Result />} />
             <Route path="settings" element={<Settings />} /> 
+            <Route path="/alarm" element={<Alarm />} />
           </Route>
         </Routes>
       </BrowserRouter>

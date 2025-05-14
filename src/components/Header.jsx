@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext'; // 경로 확인
+import { AuthContext } from '../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext); // ✅ 로그인 상태 불러오기
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -16,25 +16,44 @@ const Header = () => {
     <div
       style={{
         height: 90,
-        width: '100%',
+        width: 'calc(100% - 90px)', // 사이드바 너비 제외
         background: '#F6FAFD',
         borderBottom: '1px solid #EAEEF4',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 24px',
-        paddingRight: 441,
         boxSizing: 'border-box',
         position: 'fixed',
         top: 0,
         left: 90,
-        right: 0,
         zIndex: 100,
       }}
     >
-      <h2 style={{ margin: 0, fontSize: 24, color: '#092C4C' }}>Dashboard</h2>
+      {/* 좌측: Dashboard */}
+      <h2
+        onClick={() => navigate('/')}
+        style={{
+          margin: 0,
+          fontSize: 24,
+          color: '#092C4C',
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        Dashboard
+      </h2>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      {/* 우측: 버튼 영역 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 20,
+          whiteSpace: 'nowrap',
+          paddingRight: 40, 
+        }}
+      >
         <button
           onClick={() => navigate('/edit')}
           style={{

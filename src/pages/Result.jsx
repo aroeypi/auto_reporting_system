@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import { MdEdit, MdHome, MdShare, MdSave } from 'react-icons/md'; // 저장 아이콘 추가
+import { MdEdit, MdHome, MdShare, MdSave } from 'react-icons/md';
 
 const Result = () => {
   const navigate = useNavigate();
@@ -58,17 +58,16 @@ const Result = () => {
 
     alert('수정된 내용이 저장되었습니다!');
   };
-  
 
   const handleSaveFile = () => {
     const existingFiles = JSON.parse(localStorage.getItem('saved_files')) || [];
 
-  // 🔥 제목 중복 체크
-  const isDuplicate = existingFiles.some(file => file.title === reportTitle);
-  if (isDuplicate) {
-    alert('같은 제목의 파일이 이미 존재합니다. 제목을 바꿔주세요!');
-    return; // 저장 중단
-  }
+    const isDuplicate = existingFiles.some(file => file.title === reportTitle);
+    if (isDuplicate) {
+      alert('같은 제목의 파일이 이미 존재합니다. 제목을 바꿔주세요!');
+      return;
+    }
+
     const newFile = {
       id: Date.now(),
       title: reportTitle,
@@ -77,10 +76,22 @@ const Result = () => {
     };
 
     const updatedFiles = [...existingFiles, newFile];
-  localStorage.setItem('saved_files', JSON.stringify(updatedFiles));
+    localStorage.setItem('saved_files', JSON.stringify(updatedFiles));
 
-  alert('파일이 저장되었습니다!');
-  navigate('/file'); // 저장 후 파일리스트로 이동
+    // ✅ 알림 생성
+    const existingAlarms = JSON.parse(localStorage.getItem('alarm_list')) || [];
+    const newAlarm = {
+      id: Date.now(),
+      message: `📄 새로운 보고서 "${reportTitle}" 이(가) 저장되었습니다.`,
+      time: new Date().toLocaleString(),
+    };
+    const updatedAlarms = [newAlarm, ...existingAlarms];
+    localStorage.setItem('alarm_list', JSON.stringify(updatedAlarms));
+    localStorage.setItem('hasNewAlarm', 'true');
+    localStorage.setItem('hasNewDashboardAlert', 'true');
+
+    alert('파일이 저장되었습니다!');
+    navigate('/file');
   };
 
   const handleShare = () => {
@@ -89,15 +100,12 @@ const Result = () => {
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px', margin: '90px auto' }}>
-      
-      {/* 보고서 본문 */}
       <div style={{
         background: 'white',
         borderRadius: 12,
         boxShadow: '0 0 10px rgba(0,0,0,0.05)',
         padding: '40px',
       }}>
-        {/* 유저 정보 + 수정버튼 */}
         <div style={{
           marginBottom: '30px',
           background: '#EEF6FB',
@@ -117,24 +125,9 @@ const Result = () => {
           }}>
             {isEditing ? (
               <>
-                <input
-                  value={editableName}
-                  onChange={(e) => setEditableName(e.target.value)}
-                  placeholder="작성자"
-                  style={inputStyle}
-                />
-                <input
-                  value={editableDepartment}
-                  onChange={(e) => setEditableDepartment(e.target.value)}
-                  placeholder="부서"
-                  style={inputStyle}
-                />
-                <input
-                  value={editableDate}
-                  onChange={(e) => setEditableDate(e.target.value)}
-                  placeholder="작성날짜"
-                  style={inputStyle}
-                />
+                <input value={editableName} onChange={(e) => setEditableName(e.target.value)} placeholder="작성자" style={inputStyle} />
+                <input value={editableDepartment} onChange={(e) => setEditableDepartment(e.target.value)} placeholder="부서" style={inputStyle} />
+                <input value={editableDate} onChange={(e) => setEditableDate(e.target.value)} placeholder="작성날짜" style={inputStyle} />
               </>
             ) : (
               <>
@@ -156,57 +149,29 @@ const Result = () => {
           )}
         </div>
 
-        {/* 제목 */}
         {isEditing ? (
-          <input
-            type="text"
-            value={reportTitle}
-            onChange={(e) => setReportTitle(e.target.value)}
-            style={inputTitleStyle}
-          />
+          <input type="text" value={reportTitle} onChange={(e) => setReportTitle(e.target.value)} style={inputTitleStyle} />
         ) : (
           <h2 style={titleStyle}>{reportTitle}</h2>
         )}
 
-        {/* 본문 */}
         {isEditing ? (
-          <textarea
-            value={reportContent}
-            onChange={(e) => setReportContent(e.target.value)}
-            style={textareaStyle}
-          />
+          <textarea value={reportContent} onChange={(e) => setReportContent(e.target.value)} style={textareaStyle} />
         ) : (
-          <p style={contentStyle}>
-            {reportContent}
-          </p>
+          <p style={contentStyle}>{reportContent}</p>
         )}
       </div>
 
-      {/* 하단 버튼 */}
       {!isEditing && (
         <div style={bottomButtonArea}>
-          <button
-            onClick={handleSaveFile}
-            style={bottomButtonStyle}
-          >
-            <MdSave size={20} />
-            저장하기
+          <button onClick={handleSaveFile} style={bottomButtonStyle}>
+            <MdSave size={20} /> 저장하기
           </button>
-
-          <button
-            onClick={() => navigate('/')}
-            style={bottomButtonStyle}
-          >
-            <MdHome size={20} />
-            처음 화면
+          <button onClick={() => navigate('/')} style={bottomButtonStyle}>
+            <MdHome size={20} /> 처음 화면
           </button>
-
-          <button
-            onClick={handleShare}
-            style={bottomButtonStyle}
-          >
-            <MdShare size={20} />
-            공유하기
+          <button onClick={handleShare} style={bottomButtonStyle}>
+            <MdShare size={20} /> 공유하기
           </button>
         </div>
       )}
