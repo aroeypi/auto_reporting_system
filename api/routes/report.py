@@ -7,8 +7,8 @@ from api.schemas.report_schema import UploadPDFResponse, GenerateReportRequest, 
 import os
 from api.schemas.report_schema import GenerateReportResponse
 from report_generator import generate_report
-from fastapi import APIRouter, UploadFile, File, HTTPException
-
+from fastapi import APIRouter, UploadFile, Form, File, HTTPException
+import json
 
 from rag_engine.process import process_pdf
 
@@ -41,6 +41,20 @@ async def upload_pdf(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/generate_report", response_model=GenerateReportResponse)
-async def generate_report_route(prompt: str = Form(...)):
-    report = generate_report(prompt)
-    return GenerateReportResponse(prompt=prompt, report=report)
+async def generate_report_route(
+    topic: str = Form(...),
+    references: str = Form(...),
+    file: UploadFile = File(...)
+):
+    try:
+        references_list = [ref.strip() for ref in references.split(",") if ref.strip()]
+        report = generate_report(topic=topic, file=file, references=references_list)
+        
+        return GenerateReportResponse(
+            title="",  # 아직 제목 없음
+            content=report,  # 기존 보고서 본문
+            sources=[]  # 아직 출처 없음
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"🚨 오류 발생: {e}")

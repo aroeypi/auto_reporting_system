@@ -1,15 +1,20 @@
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import PromptTemplate
+from langchain.prompts import PromptTemplate
 from rag_engine.llm import load_llm
 from rag_engine.embedder import get_embedder
-from rag_engine.vector_store import load_vector_db
+from rag_engine.vector_store import load_vector_db, add_to_vector_db
+from rag_engine.search import search_serper
 from transformers import AutoTokenizer
-
-
+from langchain.schema import Document
+import uuid
+import json
+from typing import List
+from fastapi import UploadFile
+from rag_engine.prompt import get_search_prompt
+from rag_engine.loader import load_pdf
 import requests
 from fastapi import FastAPI, Form
 from pydantic import BaseModel
-
+import os
 
 def get_report_prompt():
     template = """
@@ -23,47 +28,76 @@ def get_report_prompt():
     return PromptTemplate.from_template(template)
 
 
-def generate_report(topic: str):
+
+def generate_report(topic: str, file: UploadFile = None, references: List[str]=None):
+    docs = []
+    # 1. PDF 업로드 → 저장
+    if file is not None:
+        save_dir = os.path.join(os.getcwd(), "data")
+        os.makedirs(save_dir, exist_ok=True)
+        filename = f"{uuid.uuid4().hex}_{file.filename}"
+        file_path = os.path.join(save_dir, filename)
+
+        with open(file_path, "wb") as f:
+            f.write(file.file.read())
+
+        # 2. PDF → 문서 분할
+        pages = load_pdf(file_path)
+        docs = [
+            Document(page_content=page.page_content, metadata={"source": filename, "page": i})
+            for i, page in enumerate(pages)
+        ]
+
+    # 3. 벡터 DB에 임베딩
     embedder = get_embedder()
     vectordb = load_vector_db(embedder)
+    add_to_vector_db(docs, vectordb)
+
+    # 4. 관련 문서 검색(내부검색)
     retriever = vectordb.as_retriever()
-    docs = retriever.get_relevant_documents(topic)
+    internal_docs = retriever.get_relevant_documents(topic)
+    
+    # 외부 검색 (Serper)
+    external_docs = search_serper(topic, num_results=3)
 
-    # for i, doc in enumerate(docs):
-    #     print(f"[DOC {i}] {doc.page_content[:300]}...\n")  # 앞 300자만 미리보기
+    # 6. 문서 통합 및 컨텍스트 구성성
+    all_docs = internal_docs + external_docs
+    context = "\n\n".join([doc.page_content for doc in all_docs])
 
-    context = "\n".join([doc.page_content for doc in docs])
+    # 5. references가 있다면 문맥 뒷부분에 사용자 요구사항으로 붙이기
+    if references:
+        requirements_text = "\n\n[사용자 요구사항]\n" + "\n".join(references)
+        context += requirements_text
 
-
-
-     # 프롬프트 구성
-    prompt_template = get_report_prompt()
+    prompt_template = get_search_prompt()
     full_prompt = prompt_template.format(context=context, question=topic)
 
-    #  토큰 길이 제한 적용 (gpt2 기준 1024 제한 → 1000으로 제한)
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
-    tokens = tokenizer.tokenize(full_prompt)
-    if len(tokens) > 1000:
-        tokens = tokens[:1000]
-    trimmed_prompt = tokenizer.convert_tokens_to_string(tokens)
 
+    # 7. 토큰 길이 제한 
+    tokenizer = AutoTokenizer.from_pretrained("skt/kogpt2-base-v2")
+    tokens = tokenizer.encode(full_prompt)
+    if len(tokens) > 800:
+        tokens = tokens[:800]
+    trimmed_prompt = tokenizer.decode(tokens)
 
-    # prompt = get_report_prompt().format(context=context, question=topic)
+    # 8. LLM 호출
     llm = load_llm()
     output = llm.invoke(trimmed_prompt)
+
     return output
 
 
 
-# ✅ API 요청/응답 스키마
+# API 요청/응답 스키마
 class GenerateReportRequest(BaseModel):
     prompt: str
 
 class GenerateReportResponse(BaseModel):
-    prompt: str
-    report: str
-
-# ✅ FastAPI 라우터
+    title: str
+    content: str
+    sources: List[str]
+    
+# FastAPI 라우터
 app = FastAPI(title="AI Report Generator API")
 
 @app.post("/generate_report", response_model=GenerateReportResponse)
@@ -81,13 +115,3 @@ if __name__ == "__main__":
 
 
 
-# def generate_report_from_server(prompt: str):
-#     try:
-#         response = requests.post(
-#             "http://localhost:8000/api/generate_report",
-#             data={"prompt": prompt}  # ← form data로 보내는 방식
-#         )
-#         print("서버 응답 상태코드:", response.status_code)
-#         print("생성된 보고서:", response.json()["report"])
-#     except requests.exceptions.RequestException as e:
-#         print(" 서버 요청 중 오류 발생:", e)

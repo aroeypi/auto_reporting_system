@@ -14,8 +14,8 @@ def load_llm():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=512,
-        do_sample=False,
+        max_new_tokens=100,
+        do_sample=True,
         temperature=0.7,
         device=-1  # CPU로 실행
     )
