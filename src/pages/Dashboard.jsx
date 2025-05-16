@@ -78,7 +78,7 @@ const Dashboard = () => {
   return (
     <div style={{ padding: 0, background: '#F6FAFD', minHeight: 'calc(100vh - 90px)' }}>
       <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#092C4C' }}>
-        👋 {userInfo ? `${userInfo.firstName}${userInfo.lastName}` : '사용자'}님, 오늘도 좋은 하루 보내세요!
+      👋 {userInfo ? userInfo.lastName : '사용자'}님, 오늘도 좋은 하루 보내세요!
       </h2>
 
       {/* 내 활동 요약 + 작성 일정 카드 가로로 */}

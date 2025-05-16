@@ -17,7 +17,7 @@ const Alarm = () => {
   const handleFakeNotice = () => {
     const newAlarm = {
       id: Date.now(),
-      message: '📢 새로운 공지사항이 등록되었습니다.',
+      message: '새로운 공지사항이 등록되었습니다.',
       time: new Date().toLocaleString(),
     };
     const updated = [newAlarm, ...alarms];

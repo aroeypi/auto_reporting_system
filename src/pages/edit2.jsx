@@ -98,19 +98,7 @@ const Edit2 = () => {
             </div>
           </div>
         </div>
-        <button
-          style={{
-            background: 'white',
-            border: '1px solid #EAEEF4',
-            borderRadius: 70,
-            padding: '10px 24px',
-            fontWeight: 500,
-            color: '#092C4C',
-            cursor: 'pointer',
-          }}
-        >
-          Change Customer
-        </button>
+       
       </div>
 
       {/* 추천제목 입력 */}
@@ -199,9 +187,7 @@ const Edit2 = () => {
 
       {/* 하단 버튼 */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-        <button style={buttonWhite} onClick={handleBack}>이전단계</button>
         <button style={buttonPrimary} onClick={() => navigate('/edit3')}>시작하기</button>
-
       </div>
     </div>
   );
