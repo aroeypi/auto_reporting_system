@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { setIsLoggedIn, setUserInfo } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init('네이티브 앱 키 입력'); // 🔥 본인 키로 대체
+      window.Kakao.init('ae6f405402a71e2f12dc093ead8907b5');
     }
   }, []);
 
@@ -27,7 +27,7 @@ const Login = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
+          username,
           password,
         }),
       });
@@ -63,13 +63,17 @@ const Login = () => {
           url: '/v2/user/me',
           success: async function (res) {
             console.log('카카오 사용자 정보', res);
-
+        
+            const kakaoId = res.id?.toString() || '';
+            const nickname = res.kakao_account?.profile?.nickname || '카카오유저';
+            const email = res.kakao_account?.email || `${kakaoId}@kakao.local`;  // 이메일 없으면 가짜 이메일로 대체
+        
             const kakaoUser = {
-              email: res.kakao_account.email || '',
-              nickname: res.kakao_account.profile.nickname || '',
-              kakaoId: res.id.toString(),
+              email,
+              nickname,
+              kakaoId,
             };
-
+        
             try {
               const serverRes = await fetch('http://localhost:8000/api/kakao-login', {
                 method: 'POST',
@@ -78,19 +82,18 @@ const Login = () => {
                 },
                 body: JSON.stringify(kakaoUser),
               });
-
+        
               if (!serverRes.ok) throw new Error('서버 로그인 실패');
-
+        
               const data = await serverRes.json();
               console.log('서버 데이터:', data);
-
+        
               localStorage.setItem('token', data.access_token);
               localStorage.setItem('user_info', JSON.stringify(data.user));
               localStorage.setItem('isLoggedIn', 'true');
-
+        
               setUserInfo(data.user);
               setIsLoggedIn(true);
-
               navigate('/');
             } catch (error) {
               console.error('카카오 로그인 서버 실패:', error);
@@ -117,12 +120,12 @@ const Login = () => {
 
         
 
-        {/* 이메일 입력 */}
+        {/* 아이디 입력 */}
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="username"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           style={inputStyle}
         />

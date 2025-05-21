@@ -33,7 +33,6 @@ const Edit = () => {
       reader.readAsDataURL(file); // 바이너리를 base64로 읽음 (이미지나 PDF 등 가능)
     }
   };
-  
 
   const handleRemoveTag = (tagToRemove) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));

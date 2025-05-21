@@ -5,13 +5,13 @@ import { AuthContext } from '../contexts/AuthContext';
 const Register = () => {
   const { setIsLoggedIn, setUserInfo } = useContext(AuthContext);
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     username: '',
     password: '',
-    department: '마케팅부',
+    department: '',
   });
 
   const navigate = useNavigate();
@@ -81,20 +81,20 @@ const Register = () => {
           <div style={{ flex: 1 }}>
             <label style={labelStyle}>First Name</label>
             <input
-              name="firstName"
-              value={form.firstName}
+              name="first_name"
+              value={form.first_name}
               onChange={handleChange}
-              placeholder="김"
+              placeholder="눈송"
               style={inputStyle}
             />
           </div>
           <div style={{ flex: 1 }}>
             <label style={labelStyle}>Last Name</label>
             <input
-              name="lastName"
-              value={form.lastName}
+              name="last_name"
+              value={form.last_name}
               onChange={handleChange}
-              placeholder="눈송"
+              placeholder="김"
               style={inputStyle}
             />
           </div>
