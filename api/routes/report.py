@@ -48,13 +48,17 @@ async def generate_report_route(
 ):
     try:
         references_list = [ref.strip() for ref in references.split(",") if ref.strip()]
+        print("📥 API 요청 도착 - topic:", topic, "| file:", file.filename)
         report = generate_report(topic=topic, file=file, references=references_list)
+        print("✅ report 반환 성공")
         
-        return GenerateReportResponse(
-            title="",  # 아직 제목 없음
-            content=report,  # 기존 보고서 본문
-            sources=[]  # 아직 출처 없음
-        )
+        # return GenerateReportResponse(
+        #     title="",  # 아직 제목 없음
+        #     content=report,  # 기존 보고서 본문
+        #     sources=[]  # 아직 출처 없음
+        # )
+        # ✅ dict → Pydantic 모델로 언팩해서 리턴
+        return GenerateReportResponse(**report)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"🚨 오류 발생: {e}")

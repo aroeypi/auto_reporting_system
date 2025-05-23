@@ -30,9 +30,11 @@ def get_report_prompt():
 
 
 def generate_report(topic: str, file: UploadFile = None, references: List[str]=None):
+    print("📌 1. 함수 진입 - topic:", topic)
     docs = []
     # 1. PDF 업로드 → 저장
     if file is not None:
+        print("📌 2. 파일 저장 시작 - filename:", file.filename)
         save_dir = os.path.join(os.getcwd(), "data")
         os.makedirs(save_dir, exist_ok=True)
         filename = f"{uuid.uuid4().hex}_{file.filename}"
@@ -40,9 +42,11 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
 
         with open(file_path, "wb") as f:
             f.write(file.file.read())
+        print("✅ 3. 파일 저장 완료 - path:", file_path)
 
         # 2. PDF → 문서 분할
         pages = load_pdf(file_path)
+        print("✅ 4. PDF 로딩 완료 - pages:", len(pages))
         docs = [
             Document(page_content=page.page_content, metadata={"source": filename, "page": i})
             for i, page in enumerate(pages)
@@ -53,6 +57,7 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
     vectordb = load_vector_db(embedder)
     if docs:
         add_to_vector_db(docs, vectordb)
+        print("✅ 5. 벡터 DB 추가 완료")
 
 
     # 4. 관련 문서 검색(내부검색)
@@ -65,6 +70,7 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
     # 6. 문서 통합 및 컨텍스트 구성성
     all_docs = internal_docs + external_docs
     context = "\n\n".join([doc.page_content for doc in all_docs])
+    print("✅ 6. 문서 통합 완료 - 문서 수:", len(all_docs))
 
     # 5. references가 있다면 문맥 뒷부분에 사용자 요구사항으로 붙이기
     if references:
@@ -73,18 +79,58 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
 
     prompt_template = get_search_prompt()
     full_prompt = prompt_template.format(context=context, question=topic)
-
+    print("📌 7. 프롬프트 생성 완료")
 
     # 7. 토큰 길이 제한 
-    tokenizer = AutoTokenizer.from_pretrained("skt/kogpt2-base-v2")
+    # tokenizer = AutoTokenizer.from_pretrained("skt/kogpt2-base-v2")
+    # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
+    # tokenizer = AutoTokenizer.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
+    # tokenizer = AutoTokenizer.from_pretrained("NousResearch/Nous-Hermes-2-Mistral-7B-DPO")
+    tokenizer = AutoTokenizer.from_pretrained("beomi/llama-2-ko-7b")
+    
+    
     tokens = tokenizer.encode(full_prompt)
-    if len(tokens) > 800:
-        tokens = tokens[:800]
+    if len(tokens) > 3000:
+        tokens = tokens[:3000]
     trimmed_prompt = tokenizer.decode(tokens)
+    print("✂️ 8. 프롬프트 잘라냄 - 길이:", len(tokens))
     
     # 8. LLM 호출
     llm = load_llm()
-    output = llm.invoke(trimmed_prompt)
+    print("✅9.1 LLM 로딩 완료")
+    # output = llm.invoke(trimmed_prompt)
+    # print("💬 9.2 LLM 응답 도착")
+    try:
+        output = llm.invoke(trimmed_prompt)
+        print("💬 9. LLM 응답 도착")
+    except Exception as e:
+        import traceback
+        print("❌ LLM invoke 실패:")
+        traceback.print_exc()
+        output = None
+
+
+    # llm, tokenizer, model = load_llm()
+
+    # max_length = getattr(model.config, "max_position_embeddings", 8192)  # 모델에서 최대 길이 가져오기
+    # tokens = tokenizer.encode(full_prompt)
+
+    # if len(tokens) > max_length:
+    #     tokens = tokens[:max_length]
+    #     full_prompt = tokenizer.decode(tokens)
+
+    # 8. LLM 호출
+    # print("💬 [디버깅] full_prompt 생성 완료")
+    # print("💬 [디버깅] full_prompt 길이:", len(full_prompt))
+    # print("💬 [디버깅] full_prompt 앞 200자:\n", full_prompt[:200])
+
+    # output = llm.invoke(full_prompt)
+    # print("🔥 full_prompt 길이:", len(full_prompt))
+    # print("🔥 LLM 출력:", output)
+    # print("🔥 output 타입:", type(output))
+
+   
+
 
     # 9. 출처 수집
     sources = [doc.metadata.get("source") for doc in all_docs if "source" in doc.metadata]
@@ -113,8 +159,8 @@ app = FastAPI(title="AI Report Generator API")
 @app.post("/generate_report", response_model=GenerateReportResponse)
 async def generate_report_api(prompt: str = Form(...)):
     report = generate_report(prompt)
-    return GenerateReportResponse(prompt=prompt, report=report)
-
+    # return GenerateReportResponse(prompt=prompt, report=report)
+    return GenerateReportResponse(**report)  # ✅ 언팩해서 딱 맞게 전달
 
 
 if __name__ == "__main__":
