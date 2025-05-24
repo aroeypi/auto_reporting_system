@@ -16,6 +16,9 @@ from fastapi import FastAPI, Form
 from pydantic import BaseModel
 import os
 
+
+
+
 def get_report_prompt():
     template = """
     다음 문서 내용을 기반으로 사용자가 원하는 주제에 대한 보고서를 작성하세요.
@@ -81,25 +84,15 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
     full_prompt = prompt_template.format(context=context, question=topic)
     print("📌 7. 프롬프트 생성 완료")
 
-    # 7. 토큰 길이 제한 
-    # tokenizer = AutoTokenizer.from_pretrained("skt/kogpt2-base-v2")
-    # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
-    # tokenizer = AutoTokenizer.from_pretrained("HuggingFaceH4/zephyr-7b-beta")
-    # tokenizer = AutoTokenizer.from_pretrained("NousResearch/Nous-Hermes-2-Mistral-7B-DPO")
-    tokenizer = AutoTokenizer.from_pretrained("beomi/llama-2-ko-7b")
-    
-    
+   
+     # 8. LLM 호출
+    llm, tokenizer, model = load_llm()
     tokens = tokenizer.encode(full_prompt)
     if len(tokens) > 3000:
         tokens = tokens[:3000]
     trimmed_prompt = tokenizer.decode(tokens)
     print("✂️ 8. 프롬프트 잘라냄 - 길이:", len(tokens))
-    
-    # 8. LLM 호출
-    llm = load_llm()
-    print("✅9.1 LLM 로딩 완료")
-    # output = llm.invoke(trimmed_prompt)
-    # print("💬 9.2 LLM 응답 도착")
+
     try:
         output = llm.invoke(trimmed_prompt)
         print("💬 9. LLM 응답 도착")
@@ -108,28 +101,6 @@ def generate_report(topic: str, file: UploadFile = None, references: List[str]=N
         print("❌ LLM invoke 실패:")
         traceback.print_exc()
         output = None
-
-
-    # llm, tokenizer, model = load_llm()
-
-    # max_length = getattr(model.config, "max_position_embeddings", 8192)  # 모델에서 최대 길이 가져오기
-    # tokens = tokenizer.encode(full_prompt)
-
-    # if len(tokens) > max_length:
-    #     tokens = tokens[:max_length]
-    #     full_prompt = tokenizer.decode(tokens)
-
-    # 8. LLM 호출
-    # print("💬 [디버깅] full_prompt 생성 완료")
-    # print("💬 [디버깅] full_prompt 길이:", len(full_prompt))
-    # print("💬 [디버깅] full_prompt 앞 200자:\n", full_prompt[:200])
-
-    # output = llm.invoke(full_prompt)
-    # print("🔥 full_prompt 길이:", len(full_prompt))
-    # print("🔥 LLM 출력:", output)
-    # print("🔥 output 타입:", type(output))
-
-   
 
 
     # 9. 출처 수집
@@ -159,7 +130,6 @@ app = FastAPI(title="AI Report Generator API")
 @app.post("/generate_report", response_model=GenerateReportResponse)
 async def generate_report_api(prompt: str = Form(...)):
     report = generate_report(prompt)
-    # return GenerateReportResponse(prompt=prompt, report=report)
     return GenerateReportResponse(**report)  # ✅ 언팩해서 딱 맞게 전달
 
 

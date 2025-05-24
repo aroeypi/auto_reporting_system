@@ -1,5 +1,5 @@
 from langchain_community.llms import HuggingFacePipeline
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
 import torch
 
 
@@ -7,29 +7,42 @@ import torch
 def load_llm():
     import os
     os.environ["HF_HOME"] = "D:\huggingface_cache" #usb경로 
-    os.environ["TRANSFORMERS_CACHE"] = "D:/huggingface_cache"
     
     # model_id = "skt/kogpt2-base-v2"
     # model_id = "mistralai/Mistral-7B-Instruct-v0.1"
     # model_id = "HuggingFaceH4/zephyr-7b-beta"
     # model_id = "NousResearch/Nous-Hermes-2-Mistral-7B-DPO"
     model_id = "beomi/llama-2-ko-7b"
-    #model_id = "meta-llama/Llama-2-7b-hf"
+  
 
     print("🚀 모델 로딩 시작:", model_id)
 
     try:
-        # Tokenizer 로딩
-        # tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=False)
-        tokenizer = AutoTokenizer.from_pretrained("beomi/llama-2-ko-7b", use_fast=True)
-        print("✅ 토크나이저 로딩 완료")
 
+        # 양자화 설정 (4bit)
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4"
+        )
+
+
+        
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_id,
+            # cache_dir="D:/huggingface_cache",
+            use_fast=True
+        )
+        print("✅ 토크나이저 로딩 완료")
+        
         # 모델 로딩
         model = AutoModelForCausalLM.from_pretrained(
             model_id,
-            torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True,
+            quantization_config=bnb_config,
+            local_files_only=True  # 🔥 오프라인 로딩
         )
         print("✅ 모델 로딩 완료")
 
