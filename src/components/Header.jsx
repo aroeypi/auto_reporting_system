@@ -41,7 +41,7 @@ const Header = () => {
           whiteSpace: 'nowrap',
         }}
       >
-        Dashboard
+        스포츠기사 AI
       </h2>
 
       {/* 우측: 버튼 영역 */}

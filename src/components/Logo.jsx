@@ -4,14 +4,22 @@ import React from 'react';
 const Logo = () => {
   return (
     <div style={{
-      height: 90,
+      height: 70,
       background: '#F6FAFD',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       borderBottom: '1px solid #EAEEF4'
     }}>
-      <div style={{ width: 46, height: 46, background: '#092C4C', borderRadius: 4 }} />
+      <span style={{
+        fontWeight: 700,
+        fontSize: 22,
+        letterSpacing: 0,
+        color: '#305078',
+        fontFamily: "'Roboto', 'Pretendard', 'Roboto', 'Noto Sans KR', Arial, sans-serif"
+      }}>
+        SPORT NEWS
+      </span>
     </div>
   );
 };

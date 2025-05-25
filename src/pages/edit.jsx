@@ -1,7 +1,6 @@
-// src/pages/Edit.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+
 
 const Edit = () => {
   const navigate = useNavigate();
@@ -27,25 +26,27 @@ const Edit = () => {
       const reader = new FileReader();
       reader.onload = () => {
         // 텍스트로 인코딩한 파일 내용 localStorage에 저장
-        localStorage.setItem('edit_file', reader.result);  // base64 또는 text
+        localStorage.setItem('edit_file', reader.result);
         localStorage.setItem('edit_fileName', file.name);
       };
-      reader.readAsDataURL(file); // 바이너리를 base64로 읽음 (이미지나 PDF 등 가능)
+      reader.readAsDataURL(file);
     }
   };
-  
 
   const handleRemoveTag = (tagToRemove) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleNextStep = () => {
-    localStorage.setItem('edit_subject', subject);
-    localStorage.setItem('edit_tags', JSON.stringify(tags));
-    localStorage.setItem('edit_fileName', fileName);
-    navigate('/edit2');
-  };
-
+  if (!subject.trim()) {
+    alert('기사 제목 또는 주제를 입력해주세요!');
+    return;
+  }
+  localStorage.setItem('edit_subject', subject);
+  localStorage.setItem('edit_tags', JSON.stringify(tags));
+  localStorage.setItem('edit_fileName', fileName);
+  navigate('/edit2');
+};
   const handleCancel = () => {
     navigate('/');
   };
@@ -53,7 +54,6 @@ const Edit = () => {
   const handleChat = () => {
     navigate('/chat');
   };
-
 
   return (
     <div
@@ -68,7 +68,7 @@ const Edit = () => {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ color: '#092C4C', fontSize: 18, fontWeight: 700 }}>보고서 시작하기</h2>
+        <h2 style={{ color: '#092C4C', fontSize: 18, fontWeight: 700 }}>스포츠 기사 작성 시작하기</h2>
         <div
           style={{
             width: 30,
@@ -91,11 +91,11 @@ const Edit = () => {
       <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* 주제 작성 */}
         <div>
-          <label style={{ fontWeight: 700, color: '#092C4C' }}>주제 작성하기</label>
+          <label style={{ fontWeight: 700, color: '#092C4C' }}>기사 제목/핵심주제 입력</label>
           <textarea
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="주제를 작성해주세요"
+            placeholder="스포츠 기사 제목이나 주요 이슈를 입력해주세요 (예: LG 트윈스, 두산에 역전승!)"
             style={{
               marginTop: 8,
               width: '95%',
@@ -111,12 +111,12 @@ const Edit = () => {
 
         {/* 작성할 분야 */}
         <div>
-          <label style={{ fontWeight: 700, color: '#092C4C' }}>작성할 분야 설정</label>
+          <label style={{ fontWeight: 700, color: '#092C4C' }}>종목/카테고리 설정</label>
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="예: 기술, 의료, 교육..."
+            placeholder="예: 야구, 축구, 배구, 농구 등"
             style={{
               marginTop: 8,
               width: '95%',
@@ -159,7 +159,7 @@ const Edit = () => {
 
         {/* 파일 첨부 */}
         <div>
-          <label style={{ fontWeight: 700, color: '#092C4C' }}>첨부 파일</label>
+          <label style={{ fontWeight: 700, color: '#092C4C' }}>경기 데이터/자료 첨부 (선택)</label>
           <label
             htmlFor="fileUpload"
             style={{
@@ -176,7 +176,7 @@ const Edit = () => {
               cursor: 'pointer',
             }}
           >
-            {fileName ? fileName : '파일을 선택하거나 여기에 드래그하세요'}
+            {fileName ? fileName : '경기 기록, 선수 명단 등 파일을 선택하거나 드래그하세요 (선택사항)'}
           </label>
           <input
             id="fileUpload"

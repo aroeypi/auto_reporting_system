@@ -1,11 +1,22 @@
-// src/pages/Edit2.jsx
+/*상단 제목: 스포츠 기사 세부 정보 입력
+
+추천제목 → 기사 제목 (수정 가능)
+
+외부 소스 → 참고 AI/소스 선택 (옵션 예시: Bing 스포츠, naver 스포츠AI 등)
+
+작성 날짜 → 기사 작성 날짜
+
+특별 요청사항 placeholder → "팀명과 선수 이름을 정확하게 표기해 주세요. 기사 스타일은 스포츠 신문처럼 써주세요."
+
+하단 버튼 → "기사 작성 시작"
+*/
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext'; // ✅ 추가
+import { AuthContext } from '../contexts/AuthContext';
 
 const Edit2 = () => {
   const navigate = useNavigate();
-  const { userInfo } = useContext(AuthContext); // ✅ 사용자 정보 가져오기
+  const { userInfo } = useContext(AuthContext);
 
   const [customTitle, setCustomTitle] = useState('');
   const [today, setToday] = useState('');
@@ -49,7 +60,7 @@ const Edit2 = () => {
     >
       {/* 헤더 영역 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ color: '#092C4C', fontSize: 18, fontWeight: 700 }}>Add Detail</h2>
+        <h2 style={{ color: '#092C4C', fontSize: 18, fontWeight: 700 }}>스포츠 기사 세부 정보 입력</h2>
         <div
           onClick={handleHome}
           style={{
@@ -98,13 +109,12 @@ const Edit2 = () => {
             </div>
           </div>
         </div>
-       
       </div>
 
       {/* 추천제목 입력 */}
       <div>
         <label style={{ fontWeight: 700, fontSize: 16, color: '#092C4C' }}>
-          추천제목 (편집 가능)
+          기사 제목 (수정 가능)
         </label>
         <input
           value={customTitle}
@@ -125,7 +135,7 @@ const Edit2 = () => {
       {/* 외부 소스 선택 */}
       <div>
         <label style={{ fontWeight: 700, fontSize: 16, color: '#092C4C', marginRight: 20 }}>
-          외부소스 선택하기
+          참고 AI/소스 선택
         </label>
         <select
           style={{
@@ -141,14 +151,14 @@ const Edit2 = () => {
         >
           <option>ChatGPT-4.0</option>
           <option>Bing</option>
-          <option>ai~~</option>
-          <option>proAI~~</option>
+          <option>naver 스포츠AI</option>
+          <option>daum 뉴스AI</option>
         </select>
       </div>
 
       {/* 작성날짜 */}
       <div>
-        <label style={{ fontWeight: 700, fontSize: 16, color: '#092C4C' }}>작성 날짜</label>
+        <label style={{ fontWeight: 700, fontSize: 16, color: '#092C4C' }}>기사 작성 날짜</label>
         <div
           style={{
             width: '30%',
@@ -170,7 +180,7 @@ const Edit2 = () => {
         <label style={{ fontWeight: 700, fontSize: 16, color: '#092C4C' }}>특별 요청사항</label>
         <textarea
           rows={4}
-          placeholder="예: 문체는 격식 있게 작성해주세요."
+          placeholder="예: 팀명과 선수 이름을 정확하게 표기해 주세요. 기사 스타일은 스포츠 신문처럼 써주세요."
           style={{
             marginTop: 8,
             width: '95%',
@@ -187,7 +197,7 @@ const Edit2 = () => {
 
       {/* 하단 버튼 */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-        <button style={buttonPrimary} onClick={() => navigate('/edit3')}>시작하기</button>
+        <button style={buttonPrimary} onClick={() => navigate('/edit3')}>기사 작성 시작</button>
       </div>
     </div>
   );
