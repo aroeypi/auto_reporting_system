@@ -1,0 +1,12 @@
+[2025-08-17 16:36:19] crawl_team start
+[crawl_team] upsert done: created=0, updated=10, skipped=0
+[2025-08-17 16:36:21] crawl_team end
+[2025-08-17 23:00:00] crawl_team start
+[crawl_team] upsert done: created=0, updated=10, skipped=0
+[2025-08-17 23:00:02] crawl_team end
+[2025-08-18 23:00:01] crawl_team start
+[crawl_team] upsert done: created=0, updated=10, skipped=0
+[2025-08-18 23:00:04] crawl_team end
+[2025-08-19 23:00:00] crawl_team start
+[crawl_team] upsert done: created=0, updated=10, skipped=0
+[2025-08-19 23:00:09] crawl_team end
