@@ -2,8 +2,11 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from dotenv import load_dotenv
 
 # --- ENV 읽기 ---
+load_dotenv()
+
 POSTGRES_DB = os.getenv("POSTGRES_DB", "report_db")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "report_user")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "pizza")
@@ -14,6 +17,9 @@ SQLALCHEMY_DATABASE_URL = (
     f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
     f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 )
+
+print(f"[DB] Using URL: postgresql://{POSTGRES_USER}:***@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
+
 
 # --- 엔진 옵션 ---
 # pool_pre_ping: 유휴 커넥션 복구

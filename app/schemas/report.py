@@ -1,6 +1,6 @@
 #app/schemas/report.py
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 
 class ReportRequest(BaseModel):
@@ -15,8 +15,12 @@ class ReportResponse(BaseModel):
 class ReportCreate(BaseModel):
     title: str
     content: str
-    sources: List[str]
+    sources: List[str] = []
+    tags: List[str] = []
+    captions: Dict = {}
 
 class ReportOut(ReportCreate):
     id: int
     created_at: datetime
+    class Config:
+        from_attributes = True

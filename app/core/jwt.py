@@ -2,6 +2,9 @@
 import os
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv(), override=True)
 
 SECRET_KEY = os.getenv("JWT_SECRET")  # 반드시 .env에서 제공
 if not SECRET_KEY:

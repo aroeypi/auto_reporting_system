@@ -14,12 +14,12 @@ from app.db.database import Base, engine, get_db
 app = FastAPI()
 
 # --- CORS: .env 에서 읽어 동적으로 적용 (콤마로 여러 개 지정 가능)
-origins_env = os.getenv("CORS_ORIGINS", "http://localhost:3000")
+origins_env = os.getenv("CORS_ORIGINS", "")
 allow_origins = [o.strip() for o in origins_env.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins,
+    allow_origins=allow_origins or ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

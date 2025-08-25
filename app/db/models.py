@@ -1,6 +1,6 @@
 #app/db/models.py
 from sqlalchemy import (
-    Column, Integer, String, Text, Date, DateTime, ForeignKey, UniqueConstraint, func
+    Column, Integer, String, Text, Date, DateTime, ForeignKey, UniqueConstraint, func, text
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
@@ -12,6 +12,8 @@ class Report(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     sources = Column(JSONB, nullable=True)
+    tags = Column(JSONB, nullable=True, server_default=text("'[]'::jsonb"))
+    captions = Column(JSONB, nullable=True, server_default=text("'{}'::jsonb"))
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 class User(Base):
