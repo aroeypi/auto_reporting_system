@@ -1,5 +1,5 @@
 # app/schemas/game.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -15,5 +15,4 @@ class GameCreate(GameBase):
 
 class GameResponse(GameBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

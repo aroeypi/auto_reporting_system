@@ -1,5 +1,5 @@
 # app/schemas/team.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class TeamBase(BaseModel):
     name: str
@@ -10,5 +10,4 @@ class TeamCreate(TeamBase):
 
 class TeamResponse(TeamBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
