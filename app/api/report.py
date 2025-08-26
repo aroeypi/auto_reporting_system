@@ -30,7 +30,7 @@ async def generate_report(
     references: str = Form("[]"),
     file: UploadFile = File(None),
     db: Session = Depends(get_db),
-    _user=Depends(get_current_user),
+    #_user=Depends(get_current_user)
 ):
     """
     보고서 생성 엔드포인트(프런트 미연동 상태에서도 동작).
