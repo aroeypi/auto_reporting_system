@@ -1,30 +1,16 @@
 # app/services/jolpai_client.py
-import os
+import os, httpx
 from typing import List, Tuple, Optional
-import httpx
 
-# ⬇️ 네 .env 키에 맞춤
 JOLPAI_BASE_URL = os.getenv("JOLPAI_BASE_URL", "http://127.0.0.1:9000")
 JOLPAI_TIMEOUT = int(os.getenv("JOLPAI_TIMEOUT_SECONDS", "60"))
-
-# 내부 토큰 (너의 .env에 이미 있음: AI_INTERNAL_TOKEN=dev-secret)
-AI_INTERNAL_TOKEN = os.getenv("JOLPAI_INTERNAL_TOKEN") or os.getenv("AI_INTERNAL_TOKEN", "")
-AI_INTERNAL_HEADER = os.getenv("JOLPAI_INTERNAL_HEADER", "X-Internal-Token")
-
-class JolpaiError(Exception):
-    pass
+AI_INTERNAL_TOKEN = os.getenv("AI_INTERNAL_TOKEN", "dev-secret")  # .env와 동일
 
 async def call_ai_generate_multipart(
     prompt: str,
     files: Optional[List[Tuple[str, bytes, str]]] = None,
 ) -> dict:
-    """
-    files: [("a.pdf", b"...", "application/pdf"), ...]
-    """
-    headers = {}
-    if AI_INTERNAL_TOKEN:
-        headers[AI_INTERNAL_HEADER] = AI_INTERNAL_TOKEN
-
+    headers = {"x_internal_token": AI_INTERNAL_TOKEN}  # jolpai가 언더스코어 헤더를 받음
     data = {"prompt": prompt}
     files_param = None
     if files:
@@ -32,14 +18,26 @@ async def call_ai_generate_multipart(
             ("files", (name, content, ctype or "application/octet-stream"))
             for (name, content, ctype) in files
         ]
-
     async with httpx.AsyncClient(timeout=JOLPAI_TIMEOUT) as client:
         r = await client.post(
             f"{JOLPAI_BASE_URL}/reports/generate",
-            headers=headers,
-            data=data,
-            files=files_param
+            headers=headers, data=data, files=files_param
         )
-    if r.status_code >= 400:
-        raise JolpaiError(f"jolpai error {r.status_code}: {r.text}")
-    return r.json()
+        r.raise_for_status()
+        return r.json()
+
+# ▶︎ 호환용 래퍼: 기존 코드가 import 하던 이름을 제공
+async def request_generate_report(
+    topic: str,
+    references: Optional[List[str]] = None,
+    file_bytes: Optional[bytes] = None,
+    file_name: Optional[str] = None,
+    user_request: Optional[str] = None,
+    content_type: Optional[str] = None,
+) -> dict:
+    # references를 prompt에 합쳐 힌트로 전달
+    prompt = topic if not references else f"{topic}\n\n[REFERENCES]\n" + "\n".join(references)
+    blobs = None
+    if file_bytes and file_name:
+        blobs = [(file_name, file_bytes, content_type or "application/octet-stream")]
+    return await call_ai_generate_multipart(prompt, blobs)
