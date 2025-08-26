@@ -12,7 +12,7 @@ from app.api.report_proxy import router as report_proxy_router  #
 from app.api import report, user, team, player, game
 from app.db.database import Base, engine, get_db
 
-app = FastAPI("Backend API")
+app = FastAPI(title="Backend API")
 
 # --- CORS: .env 에서 읽어 동적으로 적용 (콤마로 여러 개 지정 가능)
 origins_env = os.getenv("CORS_ORIGINS", "")
