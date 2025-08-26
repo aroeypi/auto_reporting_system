@@ -6,12 +6,13 @@ from starlette.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from app.api.report_proxy import router as report_proxy_router  #
 
 
 from app.api import report, user, team, player, game
 from app.db.database import Base, engine, get_db
 
-app = FastAPI()
+app = FastAPI("Backend API")
 
 # --- CORS: .env 에서 읽어 동적으로 적용 (콤마로 여러 개 지정 가능)
 origins_env = os.getenv("CORS_ORIGINS", "")
@@ -44,6 +45,9 @@ app.include_router(user.router,   prefix="/api")
 app.include_router(team.router,   prefix="/api")
 app.include_router(player.router, prefix="/api")
 app.include_router(game.router,   prefix="/api")
+
+app.include_router(report_proxy_router)
+
 
 # --- 헬스체크/DB 핑 (빠른 점검용; 필요 없으면 삭제 가능)
 @app.get("/healthz")
