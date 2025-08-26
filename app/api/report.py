@@ -63,15 +63,21 @@ async def generate_report(
     # 4) jolpai 호출 (멀티파트로 내부 포워딩)
     file_items = [(file_name, file_bytes, content_type)] if file_bytes else None
     try:
-        llm_result = await request_generate_report(prompt=prompt, file_items=file_items)
+        llm_result = await request_generate_report(topic=topic, prompt=prompt, files=file_items)
     except Exception as e:
         # upstream 오류는 502로 매핑
         raise HTTPException(status_code=502, detail=f"AI upstream error: {str(e)}")
 
-    # 5) DB 저장 스키마로 매핑 (tags/captions는 현재 ReportCreate에 없음 → 무시)
+    # 5) DB 저장 스키마로 매핑 (AI 생성 tags/captions 포함)
     title = llm_result.get("title")
     content = llm_result.get("content")
     sources = llm_result.get("sources", [])
+    tags = llm_result.get("tags", [])
+    captions = llm_result.get("captions", {})
+
+    print("🔧 auto_reporting_system 응답 처리:")
+    print(f"  - jolpai로부터 받은 tags: {tags} (타입: {type(tags)})")
+    print(f"  - jolpai로부터 받은 captions: {captions} (타입: {type(captions)})")
 
     if not title or not content:
         raise HTTPException(status_code=502, detail="AI response missing required fields (title/content)")
@@ -81,11 +87,17 @@ async def generate_report(
             title=title,
             content=content,
             sources=sources if isinstance(sources, list) else [],
+            tags=tags if isinstance(tags, list) else [],
+            captions=captions if isinstance(captions, dict) else {},
         )
+        print(f"✅ ReportCreate 생성 완료 - tags: {report_data.tags}")
     except Exception as e:
+        print(f"❌ ReportCreate 생성 실패: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to build ReportCreate: {str(e)}")
 
     saved = create_report(db, report_data)
+    print(f"💾 DB 저장 완료 - saved.tags: {saved.tags}")
+    print(f"🚀 최종 반환할 데이터 - id: {saved.id}, tags: {saved.tags}")
     return saved
 
 
