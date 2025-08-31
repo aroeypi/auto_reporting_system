@@ -19,9 +19,9 @@ async def call_ai_generate_multipart(
             for (name, content, ctype) in files
         ]
     async with httpx.AsyncClient(timeout=JOLPAI_TIMEOUT) as client:
-        print(f"🔗 jolpai 호출: {JOLPAI_BASE_URL}/api/reports/generate")
+        print(f"🔗 jolpai 호출: {JOLPAI_BASE_URL}/reports/generate")
         r = await client.post(
-            f"{JOLPAI_BASE_URL}/api/reports/generate",
+            f"{JOLPAI_BASE_URL}/reports/generate",
             headers=headers, data=data, files=files_param
         )
         r.raise_for_status()
